@@ -1,0 +1,867 @@
+{
+  "commands": {
+    "warden:access": {
+      "aliases": [],
+      "args": {},
+      "description": "Resolves active users who have access to a target and attributes each access path to Profile, Permission Set, or Permission Set Group sources.",
+      "examples": [
+        "Field access in human output (default):\n<%= config.bin %> <%= command.id %> --type field --target Account.CustomField__c --target-org myOrg",
+        "Object access in csv output:\n<%= config.bin %> <%= command.id %> --type object --target Account --target-org myOrg --output csv",
+        "Field access in json output:\n<%= config.bin %> <%= command.id %> --type field --target Account.CustomField__c --target-org myOrg --output json",
+        "Apex class access in human output:\n<%= config.bin %> <%= command.id %> --type apex-class --target MyController --target-org myOrg",
+        "Visualforce page access in csv output:\n<%= config.bin %> <%= command.id %> --type vf-page --target MyPage --target-org myOrg --output csv",
+        "Custom permission access in json output:\n<%= config.bin %> <%= command.id %> --type custom-permission --target Can_Edit_Accounts --target-org myOrg --output json",
+        "Tab visibility in human output:\n<%= config.bin %> <%= command.id %> --type tab --target Account --target-org myOrg"
+      ],
+      "flags": {
+        "json": {
+          "description": "Format output as json.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "flags-dir": {
+          "helpGroup": "GLOBAL",
+          "name": "flags-dir",
+          "summary": "Import flag values from a directory.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "target-org": {
+          "char": "o",
+          "name": "target-org",
+          "noCacheDefault": true,
+          "required": true,
+          "summary": "Target org username or alias.",
+          "hasDynamicHelp": true,
+          "multiple": false,
+          "type": "option"
+        },
+        "type": {
+          "name": "type",
+          "required": true,
+          "summary": "Target type to audit: field, object, apex-class, vf-page, custom-permission, or tab.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "options": [
+            "field",
+            "object",
+            "apex-class",
+            "vf-page",
+            "custom-permission",
+            "tab"
+          ],
+          "type": "option"
+        },
+        "target": {
+          "name": "target",
+          "required": true,
+          "summary": "Target API name. Use Object.Field for field, Object for object, Apex class name for apex-class, Visualforce page name for vf-page, custom permission DeveloperName for custom-permission, or tab API name for tab.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "output": {
+          "name": "output",
+          "required": false,
+          "summary": "Output format: human, csv, or json. Defaults to human.",
+          "default": "human",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "options": [
+            "human",
+            "csv",
+            "json"
+          ],
+          "type": "option"
+        },
+        "api-version": {
+          "description": "Override the api version used for api requests made by this command",
+          "name": "api-version",
+          "summary": "Override the api version used for the org connection.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        }
+      },
+      "hasDynamicHelp": true,
+      "hiddenAliases": [],
+      "id": "warden:access",
+      "pluginAlias": "@syntax-syllogism/warden",
+      "pluginName": "@syntax-syllogism/warden",
+      "pluginType": "core",
+      "strict": true,
+      "summary": "Audit active-user access for a permission target.",
+      "enableJsonFlag": true,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "warden",
+        "access.js"
+      ],
+      "aliasPermutations": [],
+      "permutations": [
+        "warden:access",
+        "access:warden"
+      ]
+    },
+    "warden:diff": {
+      "aliases": [],
+      "args": {},
+      "description": "Reports read-only drift across profile, role, permission sets, permission set groups, public groups, and queues without applying changes.",
+      "examples": [
+        "Compare users in a definition file against their personas:\n<%= config.bin %> <%= command.id %> --users-def config/user-def.json --personas-def config/persona-def.json --external-id FederationIdentifier --target-org myOrg",
+        "Compare one user against another:\n<%= config.bin %> <%= command.id %> --user username:new@example.com --against username:template@example.com --target-org myOrg --output csv"
+      ],
+      "flags": {
+        "json": {
+          "description": "Format output as json.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "flags-dir": {
+          "helpGroup": "GLOBAL",
+          "name": "flags-dir",
+          "summary": "Import flag values from a directory.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "target-org": {
+          "char": "o",
+          "name": "target-org",
+          "noCacheDefault": true,
+          "required": true,
+          "summary": "Target org username or alias.",
+          "hasDynamicHelp": true,
+          "multiple": false,
+          "type": "option"
+        },
+        "user": {
+          "dependsOn": [
+            "against"
+          ],
+          "name": "user",
+          "summary": "Target user to compare using `field:value`.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "against": {
+          "dependsOn": [
+            "user"
+          ],
+          "name": "against",
+          "summary": "Reference user to compare against using `field:value`.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "users-def": {
+          "dependsOn": [
+            "personas-def"
+          ],
+          "name": "users-def",
+          "summary": "Path to user definition JSON file.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "personas-def": {
+          "dependsOn": [
+            "users-def"
+          ],
+          "name": "personas-def",
+          "summary": "Path to persona definition JSON file.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "external-id": {
+          "name": "external-id",
+          "summary": "Default User field used to match entries in `--users-def`.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "output": {
+          "name": "output",
+          "summary": "Output format when not using global `--json`.",
+          "default": "human",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "options": [
+            "human",
+            "csv",
+            "json"
+          ],
+          "type": "option"
+        },
+        "verbose": {
+          "name": "verbose",
+          "summary": "Include assignments that are already present in both sides in human output.",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "api-version": {
+          "description": "Override the api version used for api requests made by this command",
+          "name": "api-version",
+          "summary": "Override the api version used for the org connection.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        }
+      },
+      "hasDynamicHelp": true,
+      "hiddenAliases": [],
+      "id": "warden:diff",
+      "pluginAlias": "@syntax-syllogism/warden",
+      "pluginName": "@syntax-syllogism/warden",
+      "pluginType": "core",
+      "strict": true,
+      "summary": "Compare user assignments against intended persona state or another user.",
+      "enableJsonFlag": true,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "warden",
+        "diff.js"
+      ],
+      "aliasPermutations": [],
+      "permutations": [
+        "warden:diff",
+        "diff:warden"
+      ]
+    },
+    "warden:freeze": {
+      "aliases": [],
+      "args": {},
+      "description": "Freezes matching users by setting `UserLogin.IsFrozen = true` and leaving all other access untouched.",
+      "examples": [
+        "Preview a single freeze by field match:\n<%= config.bin %> <%= command.id %> --user username:someone@example.com --dry-run --target-org myOrg",
+        "Freeze users from a definition file without prompts:\n<%= config.bin %> <%= command.id %> --users-def config/user-def.json --external-id FederationIdentifier --target-org myOrg --no-prompt"
+      ],
+      "flags": {
+        "json": {
+          "description": "Format output as json.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "flags-dir": {
+          "helpGroup": "GLOBAL",
+          "name": "flags-dir",
+          "summary": "Import flag values from a directory.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "target-org": {
+          "char": "o",
+          "name": "target-org",
+          "noCacheDefault": true,
+          "required": true,
+          "summary": "Target org username or alias.",
+          "hasDynamicHelp": true,
+          "multiple": false,
+          "type": "option"
+        },
+        "user": {
+          "name": "user",
+          "summary": "Target a single user using `field:value`.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "users-def": {
+          "name": "users-def",
+          "summary": "Path to a user definition JSON file.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "external-id": {
+          "name": "external-id",
+          "summary": "Default User field used to match entries in `--users-def`.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "no-prompt": {
+          "name": "no-prompt",
+          "summary": "Skip confirmation prompts before write operations.",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "dry-run": {
+          "name": "dry-run",
+          "summary": "Validate and plan actions without any write operations.",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "api-version": {
+          "description": "Override the api version used for api requests made by this command",
+          "name": "api-version",
+          "summary": "Override the api version used for the org connection.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        }
+      },
+      "hasDynamicHelp": true,
+      "hiddenAliases": [],
+      "id": "warden:freeze",
+      "pluginAlias": "@syntax-syllogism/warden",
+      "pluginName": "@syntax-syllogism/warden",
+      "pluginType": "core",
+      "strict": true,
+      "summary": "Freeze one or more users.",
+      "enableJsonFlag": true,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "warden",
+        "freeze.js"
+      ],
+      "aliasPermutations": [],
+      "permutations": [
+        "warden:freeze",
+        "freeze:warden"
+      ]
+    },
+    "warden:provision": {
+      "aliases": [],
+      "args": {},
+      "description": "Provisions Salesforce users by merging multiple personas per user into an effective persona (unioning assignment lists, enforcing singular-value agreement), applying insert-only Username and Alias defaults, enforcing optional profile and role, activating and unfreezing users, and planning or applying assignment changes.",
+      "examples": [
+        "Dry run with explicit external id:\n<%= config.bin %> <%= command.id %> --users-def config/user-def.json --personas-def config/persona-def.json --external-id FederationIdentifier --target-org myOrg --dry-run",
+        "Apply provisioning with no prompt:\n<%= config.bin %> <%= command.id %> --users-def config/user-def.json --personas-def config/persona-def.json --target-org myOrg --no-prompt"
+      ],
+      "flags": {
+        "json": {
+          "description": "Format output as json.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "flags-dir": {
+          "helpGroup": "GLOBAL",
+          "name": "flags-dir",
+          "summary": "Import flag values from a directory.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "target-org": {
+          "char": "o",
+          "name": "target-org",
+          "noCacheDefault": true,
+          "required": true,
+          "summary": "Target org username or alias.",
+          "hasDynamicHelp": true,
+          "multiple": false,
+          "type": "option"
+        },
+        "users-def": {
+          "name": "users-def",
+          "required": true,
+          "summary": "Path to user definition JSON file.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "personas-def": {
+          "name": "personas-def",
+          "required": true,
+          "summary": "Path to persona definition JSON file.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "external-id": {
+          "name": "external-id",
+          "summary": "User field used to match existing users by default. Per-user `match` overrides this for individual rows. If omitted, all entries are treated as inserts.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "no-prompt": {
+          "name": "no-prompt",
+          "summary": "Skip warning confirmation prompts.",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "dry-run": {
+          "name": "dry-run",
+          "summary": "Validate and plan actions without any write operations.",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "api-version": {
+          "description": "Override the api version used for api requests made by this command",
+          "name": "api-version",
+          "summary": "Override the api version used for the org connection.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        }
+      },
+      "hasDynamicHelp": true,
+      "hiddenAliases": [],
+      "id": "warden:provision",
+      "pluginAlias": "@syntax-syllogism/warden",
+      "pluginName": "@syntax-syllogism/warden",
+      "pluginType": "core",
+      "strict": true,
+      "summary": "Provision users from user and persona definition files.",
+      "enableJsonFlag": true,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "warden",
+        "provision.js"
+      ],
+      "aliasPermutations": [],
+      "permutations": [
+        "warden:provision",
+        "provision:warden"
+      ]
+    },
+    "warden:restore": {
+      "aliases": [],
+      "args": {},
+      "description": "Re-resolves users by the snapshot match key, reactivates and unfreezes them, and adds missing assignments without removing existing access.",
+      "examples": [
+        "Preview a restore:\n<%= config.bin %> <%= command.id %> --snapshot snapshots/user.json --dry-run --target-org myOrg",
+        "Restore without prompts:\n<%= config.bin %> <%= command.id %> --snapshot snapshots/user.json --target-org myOrg --no-prompt"
+      ],
+      "flags": {
+        "json": {
+          "description": "Format output as json.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "flags-dir": {
+          "helpGroup": "GLOBAL",
+          "name": "flags-dir",
+          "summary": "Import flag values from a directory.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "target-org": {
+          "char": "o",
+          "name": "target-org",
+          "noCacheDefault": true,
+          "required": true,
+          "summary": "Target org username or alias.",
+          "hasDynamicHelp": true,
+          "multiple": false,
+          "type": "option"
+        },
+        "snapshot": {
+          "name": "snapshot",
+          "required": true,
+          "summary": "Path to a user snapshot JSON file.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "no-prompt": {
+          "name": "no-prompt",
+          "summary": "Skip confirmation prompts before write operations.",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "dry-run": {
+          "name": "dry-run",
+          "summary": "Validate and plan actions without any write operations.",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "api-version": {
+          "description": "Override the api version used for api requests made by this command",
+          "name": "api-version",
+          "summary": "Override the api version used for the org connection.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        }
+      },
+      "hasDynamicHelp": true,
+      "hiddenAliases": [],
+      "id": "warden:restore",
+      "pluginAlias": "@syntax-syllogism/warden",
+      "pluginName": "@syntax-syllogism/warden",
+      "pluginType": "core",
+      "strict": true,
+      "summary": "Restore user assignment state from a snapshot file.",
+      "enableJsonFlag": true,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "warden",
+        "restore.js"
+      ],
+      "aliasPermutations": [],
+      "permutations": [
+        "warden:restore",
+        "restore:warden"
+      ]
+    },
+    "warden:snapshot": {
+      "aliases": [],
+      "args": {},
+      "description": "Captures matching users' active/frozen state and access assignments using developer/API names so the snapshot can be restored later.",
+      "examples": [
+        "Snapshot a single user:\n<%= config.bin %> <%= command.id %> --user username:someone@example.com --out snapshots/user.json --target-org myOrg",
+        "Snapshot users from a definition file:\n<%= config.bin %> <%= command.id %> --users-def config/user-def.json --external-id FederationIdentifier --out snapshots/users.json --target-org myOrg"
+      ],
+      "flags": {
+        "json": {
+          "description": "Format output as json.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "flags-dir": {
+          "helpGroup": "GLOBAL",
+          "name": "flags-dir",
+          "summary": "Import flag values from a directory.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "target-org": {
+          "char": "o",
+          "name": "target-org",
+          "noCacheDefault": true,
+          "required": true,
+          "summary": "Target org username or alias.",
+          "hasDynamicHelp": true,
+          "multiple": false,
+          "type": "option"
+        },
+        "user": {
+          "name": "user",
+          "summary": "Target a single user using `field:value`.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "users-def": {
+          "name": "users-def",
+          "summary": "Path to a user definition JSON file.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "external-id": {
+          "name": "external-id",
+          "summary": "Default User field used to match entries in `--users-def`.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "out": {
+          "name": "out",
+          "summary": "Path to write the snapshot JSON file.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "api-version": {
+          "description": "Override the api version used for api requests made by this command",
+          "name": "api-version",
+          "summary": "Override the api version used for the org connection.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        }
+      },
+      "hasDynamicHelp": true,
+      "hiddenAliases": [],
+      "id": "warden:snapshot",
+      "pluginAlias": "@syntax-syllogism/warden",
+      "pluginName": "@syntax-syllogism/warden",
+      "pluginType": "core",
+      "strict": true,
+      "summary": "Capture user assignment state to a portable snapshot file.",
+      "enableJsonFlag": true,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "warden",
+        "snapshot.js"
+      ],
+      "aliasPermutations": [],
+      "permutations": [
+        "warden:snapshot",
+        "snapshot:warden"
+      ]
+    },
+    "warden:strip": {
+      "aliases": [],
+      "args": {},
+      "description": "Freezes matching users, removes access grants, and deactivates the user unless the corresponding opt-out flags are set.",
+      "examples": [
+        "Preview a strip for a single user:\n<%= config.bin %> <%= command.id %> --user username:someone@example.com --dry-run --target-org myOrg",
+        "Strip users from a definition file without prompts:\n<%= config.bin %> <%= command.id %> --users-def config/user-def.json --external-id FederationIdentifier --target-org myOrg --no-prompt",
+        "Keep permission set licenses while stripping everything else:\n<%= config.bin %> <%= command.id %> --users-def config/user-def.json --keep-licenses --target-org myOrg --dry-run",
+        "Capture a restorable snapshot before stripping:\n<%= config.bin %> <%= command.id %> --user username:someone@example.com --snapshot snapshots/user.json --target-org myOrg --no-prompt"
+      ],
+      "flags": {
+        "json": {
+          "description": "Format output as json.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "flags-dir": {
+          "helpGroup": "GLOBAL",
+          "name": "flags-dir",
+          "summary": "Import flag values from a directory.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "target-org": {
+          "char": "o",
+          "name": "target-org",
+          "noCacheDefault": true,
+          "required": true,
+          "summary": "Target org username or alias.",
+          "hasDynamicHelp": true,
+          "multiple": false,
+          "type": "option"
+        },
+        "user": {
+          "name": "user",
+          "summary": "Target a single user using `field:value`.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "users-def": {
+          "name": "users-def",
+          "summary": "Path to a user definition JSON file.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "external-id": {
+          "name": "external-id",
+          "summary": "Default User field used to match entries in `--users-def`.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "no-prompt": {
+          "name": "no-prompt",
+          "summary": "Skip confirmation prompts before write operations.",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "dry-run": {
+          "name": "dry-run",
+          "summary": "Validate and plan actions without any write operations.",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "no-freeze": {
+          "name": "no-freeze",
+          "summary": "Skip the initial freeze step.",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "no-deactivate": {
+          "name": "no-deactivate",
+          "summary": "Skip the final deactivation step.",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "keep-permsets": {
+          "name": "keep-permsets",
+          "summary": "Keep permission set assignments.",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "keep-permset-groups": {
+          "name": "keep-permset-groups",
+          "summary": "Keep permission set group assignments.",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "keep-licenses": {
+          "name": "keep-licenses",
+          "summary": "Keep permission set license assignments.",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "keep-public-groups": {
+          "name": "keep-public-groups",
+          "summary": "Keep public group memberships.",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "keep-queues": {
+          "name": "keep-queues",
+          "summary": "Keep queue memberships.",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "snapshot": {
+          "name": "snapshot",
+          "summary": "Write a portable user snapshot JSON file before stripping access, including during dry-run.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "api-version": {
+          "description": "Override the api version used for api requests made by this command",
+          "name": "api-version",
+          "summary": "Override the api version used for the org connection.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        }
+      },
+      "hasDynamicHelp": true,
+      "hiddenAliases": [],
+      "id": "warden:strip",
+      "pluginAlias": "@syntax-syllogism/warden",
+      "pluginName": "@syntax-syllogism/warden",
+      "pluginType": "core",
+      "strict": true,
+      "summary": "Strip and deactivate one or more users.",
+      "enableJsonFlag": true,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "warden",
+        "strip.js"
+      ],
+      "aliasPermutations": [],
+      "permutations": [
+        "warden:strip",
+        "strip:warden"
+      ]
+    },
+    "warden:unfreeze": {
+      "aliases": [],
+      "args": {},
+      "description": "Unfreezes matching users by setting `UserLogin.IsFrozen = false` and leaving all other access untouched.",
+      "examples": [
+        "Preview a single unfreeze by field match:\n<%= config.bin %> <%= command.id %> --user username:someone@example.com --dry-run --target-org myOrg",
+        "Unfreeze users from a definition file without prompts:\n<%= config.bin %> <%= command.id %> --users-def config/user-def.json --external-id FederationIdentifier --target-org myOrg --no-prompt"
+      ],
+      "flags": {
+        "json": {
+          "description": "Format output as json.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "flags-dir": {
+          "helpGroup": "GLOBAL",
+          "name": "flags-dir",
+          "summary": "Import flag values from a directory.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "target-org": {
+          "char": "o",
+          "name": "target-org",
+          "noCacheDefault": true,
+          "required": true,
+          "summary": "Target org username or alias.",
+          "hasDynamicHelp": true,
+          "multiple": false,
+          "type": "option"
+        },
+        "user": {
+          "name": "user",
+          "summary": "Target a single user using `field:value`.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "users-def": {
+          "name": "users-def",
+          "summary": "Path to a user definition JSON file.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "external-id": {
+          "name": "external-id",
+          "summary": "Default User field used to match entries in `--users-def`.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "no-prompt": {
+          "name": "no-prompt",
+          "summary": "Skip confirmation prompts before write operations.",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "dry-run": {
+          "name": "dry-run",
+          "summary": "Validate and plan actions without any write operations.",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "api-version": {
+          "description": "Override the api version used for api requests made by this command",
+          "name": "api-version",
+          "summary": "Override the api version used for the org connection.",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        }
+      },
+      "hasDynamicHelp": true,
+      "hiddenAliases": [],
+      "id": "warden:unfreeze",
+      "pluginAlias": "@syntax-syllogism/warden",
+      "pluginName": "@syntax-syllogism/warden",
+      "pluginType": "core",
+      "strict": true,
+      "summary": "Unfreeze one or more users.",
+      "enableJsonFlag": true,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "warden",
+        "unfreeze.js"
+      ],
+      "aliasPermutations": [],
+      "permutations": [
+        "warden:unfreeze",
+        "unfreeze:warden"
+      ]
+    }
+  },
+  "version": "0.1.0"
+}

@@ -1,0 +1,45 @@
+# Controls what goes INTO the packaged .vsix (separate from .gitignore, which
+# controls the git repo, and .gitignore.public, which controls the public repo).
+# Keep dist/ — it holds the bundled extension entry point that ships to users.
+
+.vscode/**
+.vscode-test/**
+.vscode-test.*
+.history/**
+out/**
+node_modules/**
+src/**
+scripts/**
+vendor/**
+
+# repo-management / release tooling — must NEVER ship in the .vsix
+.github/**
+bin/**
+
+# AI / agent tooling — private, must NEVER ship in the .vsix
+.claude/**
+.agents/**
+.codex/**
+.gemini/**
+.cursor/**
+.rtk/**
+
+# config / meta not needed at runtime
+.gitignore
+.gitignore.public
+.editorconfig
+esbuild.js
+**/tsconfig.json
+**/eslint.config.mjs
+**/*.map
+**/*.ts
+*.vsix
+
+# repo docs not needed inside the package (README, LICENSE, CHANGELOG are kept)
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+SECURITY.md
+vsc-extension-quickstart.md
