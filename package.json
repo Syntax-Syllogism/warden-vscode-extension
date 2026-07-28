@@ -1,0 +1,146 @@
+{
+  "name": "warden-ext",
+  "displayName": "Warden",
+  "description": "Guided VS Code workflows for the @syntax-syllogism/warden Salesforce CLI plugin.",
+  "version": "0.2.0",
+  "publisher": "syntax-syllogism",
+  "author": "Jake Richter <j.p.richter@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Syntax-Syllogism/warden-code-ext.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Syntax-Syllogism/warden-code-ext/issues"
+  },
+  "homepage": "https://github.com/Syntax-Syllogism/warden-code-ext#readme",
+  "icon": "media/warden-logo.png",
+  "keywords": [
+    "salesforce",
+    "sf",
+    "sfdx",
+    "warden",
+    "user lifecycle"
+  ],
+  "engines": {
+    "vscode": "^1.88.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "workspaceContains:sfdx-project.json",
+    "workspaceContains:**/.sf/config.json",
+    "onView:wardenCommands"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "warden.provision",
+        "title": "SF Warden: Provision"
+      },
+      {
+        "command": "warden.access",
+        "title": "SF Warden: Access"
+      },
+      {
+        "command": "warden.strip",
+        "title": "SF Warden: Strip"
+      },
+      {
+        "command": "warden.freeze",
+        "title": "SF Warden: Freeze"
+      },
+      {
+        "command": "warden.unfreeze",
+        "title": "SF Warden: Unfreeze"
+      },
+      {
+        "command": "warden.snapshot",
+        "title": "SF Warden: Snapshot"
+      },
+      {
+        "command": "warden.restore",
+        "title": "SF Warden: Restore"
+      },
+      {
+        "command": "warden.diff",
+        "title": "SF Warden: Diff"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "warden",
+          "title": "Warden",
+          "icon": "media/warden.svg"
+        }
+      ]
+    },
+    "views": {
+      "warden": [
+        {
+          "id": "wardenCommands",
+          "name": "Commands"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Warden",
+      "properties": {
+        "warden.defaultTargetOrg": {
+          "type": "string",
+          "default": "",
+          "description": "Default Salesforce org alias or username for Warden commands."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && npm run lint && node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "npm run check-types && npm run lint && node esbuild.js --production",
+    "package:vsix": "npm run package && vsce package --no-dependencies",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "prepare": "husky",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src",
+    "lint:md": "markdownlint-cli2 \"**/*.md\"",
+    "lint:md:fix": "markdownlint-cli2 --fix \"**/*.md\"",
+    "test": "vscode-test",
+    "gen:commands": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/gen-commands.ts"
+  },
+  "lint-staged": {
+    "*.md": "markdownlint-cli2 --fix"
+  },
+  "devDependencies": {
+    "@types/cross-spawn": "^6.0.6",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "26.x",
+    "@types/vscode": "1.88.0",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.0.0",
+    "@vscode/vsce": "^3.9.2",
+    "esbuild": "^0.28.1",
+    "eslint": "^10.5.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.8",
+    "markdownlint-cli2": "^0.22.1",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.61.1"
+  },
+  "overrides": {
+    "diff": "^8.0.4",
+    "serialize-javascript": "^7.0.6"
+  },
+  "dependencies": {
+    "cross-spawn": "^7.0.6"
+  }
+}
