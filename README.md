@@ -1,83 +1,31 @@
 # Warden
 
-Warden is a VS Code extension for guided `@syntax-syllogism/warden` Salesforce CLI workflows: provisioning, auditing, freezing, and restoring users.
-
-## Features
-
-- Command Palette entries and Warden sidebar actions for every supported command.
-- User Lifecycle commands:
-  - `SF Warden: Provision` (`sf warden provision`)
-  - `SF Warden: Access` (`sf warden access`)
-  - `SF Warden: Strip` (`sf warden strip`)
-  - `SF Warden: Freeze` (`sf warden freeze`)
-  - `SF Warden: Unfreeze` (`sf warden unfreeze`)
-  - `SF Warden: Snapshot` (`sf warden snapshot`)
-  - `SF Warden: Restore` (`sf warden restore`)
-  - `SF Warden: Diff` (`sf warden diff`)
-- Dedicated Warden activity-bar view: all 8 commands are listed flat under a single User Lifecycle group.
-- Guided native inputs:
-  - Salesforce org picker with `warden.defaultTargetOrg` fallback.
-  - Workspace JSON/CSV Quick Pick for `--users-def` plus JSON Quick Picks for persona and snapshot files, with last-used files surfaced first.
-  - QuickPick enums for flags such as `--type` on Access.
-  - Single-select QuickPick for mutually exclusive user targeting (`--user` or `--users-def`).
-  - Multi-select QuickPick for boolean options, such as `--dry-run`.
-  - InputBox prompts for string values such as usernames and match fields.
-- Background `sf warden ...` execution through `child_process.spawn`, streamed to the `Warden` Output Channel.
-- Cancellable progress notifications while commands run.
-- Human-readable CLI output by default; the extension does not force `--json`.
-- Optional `--output-file` capture writes a JSON payload and offers to open the resulting file on success.
-- Automatic `--no-prompt` only for commands that support it (`Restore` exposes `--no-prompt` as an ordinary picker option instead).
-- **Strip dry-run/apply flow:** `SF Warden: Strip` is the one destructive command in the set. Running it always previews first:
-  1. The extension confirms you want to run the command, then spawns `sf warden strip ... --dry-run` and streams the preview to the Warden output channel.
-  2. If the dry run fails, an error is shown and the flow stops.
-  3. On success, a modal warning asks "Apply the strip changes shown in the Warden output channel?" — only on confirming **Apply** does the extension re-run the same command without `--dry-run` to perform the actual strip.
-  No other Warden command uses this two-step strategy.
-- Pre-run detection for the Salesforce CLI and the warden plugin, with an install action when the plugin is missing.
+Warden provides guided VS Code workflows for provisioning, auditing, freezing, stripping, snapshotting, restoring, and comparing Salesforce users. All eight commands run in the extension host through `@syntax-syllogism/warden-core`.
 
 ## Requirements
 
-Install the Salesforce CLI and the warden plugin before running commands:
+Authenticate an org with `sf org login web` before running a command. The Salesforce CLI is needed for login; the Warden CLI plugin is not required. When no authenticated org is found, the extension offers a terminal shortcut for login.
 
-```sh
-sf plugins install @syntax-syllogism/warden
-```
+## Features
 
-The extension checks for `sf` and `sf warden --help` before the first command run. If the plugin is missing, it offers an install action.
+- Command Palette actions and a Warden sidebar for Provision, Access, Diff, Freeze, Unfreeze, Strip, Snapshot, and Restore.
+- Prompts based on core option schemas and UI hints, including related records, CSV input format and list delimiter, and the `record-type` access type.
+- A rendered plan preview and modal confirmation before every write. Closing the confirmation applies nothing.
+- Cancellable progress notifications, human results in the Warden output channel, and optional workspace-relative `.csv` or JSON output files.
+- JSON validation for persona, users, and related-catalog definitions. When a filename does not match an association pattern, set `$schema` to the corresponding core schema ID:
+  - Persona: `https://raw.githubusercontent.com/Syntax-Syllogism/warden-core/release/schemas/persona-definitions.schema.json`
+  - Users: `https://raw.githubusercontent.com/Syntax-Syllogism/warden-core/release/schemas/users-definition.schema.json`
+  - Related catalog: `https://raw.githubusercontent.com/Syntax-Syllogism/warden-core/release/schemas/related-catalog.schema.json`
 
-## Extension Settings
-
-- `warden.defaultTargetOrg`: default Salesforce org alias or username for Warden commands.
+`warden.defaultTargetOrg` sets the initial org picker value. Last-used input values are stored per command and option key.
 
 ## Development
 
-### Quick Start
-
 ```sh
-npm install
-npm test
+npm ci --ignore-scripts
+npm run compile
+xvfb-run -a npm run test
 npm run package:vsix
 ```
 
-See [docs/README.md](docs/README.md) for comprehensive developer documentation, including:
-
-- **[Architecture Overview](docs/architecture.md)** — Design and components
-- **[Input System](docs/input-system.md)** — How user input is collected
-- **[Command Runner](docs/command-runner.md)** — Command execution, including the strip dry-run/apply flow
-- **[Command Registry](docs/command-registry.md)** — Command definitions and generation
-- **[Extending the Extension](docs/extending.md)** — Adding new commands and features
-- **[Testing Guide](docs/testing.md)** — Writing and running tests
-
-### Updating Commands
-
-Refresh the committed command registry from a warden oclif manifest:
-
-```sh
-cd ../warden
-yarn build
-npx oclif manifest
-cp oclif.manifest.json ../warden-code-ext/vendor/warden.oclif.manifest.json
-cd ../warden-code-ext
-npm run gen:commands -- vendor/warden.oclif.manifest.json src/registry/commands.generated.ts
-```
-
-This is needed when the warden CLI plugin adds new commands or changes flag definitions. Build the sibling CLI first so the manifest reflects fresh compiled command declarations, then copy it into `vendor/` and regenerate the registry. The vendored manifest is intentionally a manual snapshot; inspect the generated diff before testing.
+When warden-core descriptors change, pin the new exact version and run `npm run sync:contributes`. See the [documentation index](docs/README.md) for implementation details.

@@ -1,30 +1,27 @@
-export type FlagKind = 'org' | 'file' | 'outputDir' | 'outputFile' | 'string' | 'boolean' | 'apiVersion' | 'enum';
+export type CommandId = 'provision' | 'access' | 'diff' | 'freeze' | 'unfreeze' | 'strip' | 'snapshot' | 'restore';
 
-export interface FlagDef {
-	name: string;
-	kind: FlagKind;
+export type InputKind = 'org' | 'file' | 'outputFile' | 'string' | 'boolean' | 'enum';
+
+export interface InputDef {
+	key: string;
+	kind: InputKind;
+	label: string;
 	summary?: string;
 	required?: boolean;
 	options?: readonly string[];
 	placeholder?: string;
 	exclusiveGroup?: string;
-	/**
-	 * Only prompt for this flag once the named flag has been chosen. Used to defer
-	 * follow-up flags (e.g. `external-id`) until the exclusive-group option they
-	 * apply to (e.g. `users-def`) is selected.
-	 */
-	dependsOnFlag?: string;
-	default?: string;
+	dependsOn?: string;
+	default?: unknown;
+	fileFilter?: 'json' | 'csv' | 'json-or-csv';
 }
 
 export interface CommandDef {
 	id: string;
-	cliId: string;
+	coreId: CommandId;
 	title: string;
 	group: string;
-	subgroup?: string;
-	supportsNoPrompt?: boolean;
-	destructive?: boolean;
-	requireOneOf?: readonly string[];
-	flags: readonly FlagDef[];
+	kind: 'read' | 'write';
+	destructive: boolean;
+	inputs: readonly InputDef[];
 }

@@ -1,0 +1,109 @@
+# Publish to the VS Code Marketplace
+#
+# Runs in the PUBLIC repo when a GitHub Release is published (the
+# `gh release create` step printed by the release tool). It builds the tagged
+# commit, publishes the VSIX with Microsoft Entra ID (no PAT), and attaches the
+# VSIX to the release.
+#
+# Auth: a user-assigned managed identity trusts this repo's `marketplace`
+# GitHub Environment through a federated credential. AZURE_CLIENT_ID and
+# AZURE_TENANT_ID are environment variables (not secrets). One-time setup:
+# tooling/docs/vscode-marketplace.md in the private tooling repo.
+#
+# Manual run (Actions → Publish to VS Code Marketplace → Run workflow):
+#   mode=publish   re-publish an existing tag (already-published versions are skipped)
+#   mode=identity  print the Marketplace member ID for the managed identity
+
+name: Publish to VS Code Marketplace
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to publish (e.g. v0.3.0). Ignored for mode=identity.
+        required: false
+      mode:
+        description: What to run
+        type: choice
+        options: [publish, identity]
+        default: publish
+
+permissions:
+  contents: write # upload the VSIX to the GitHub Release
+  id-token: write # GitHub OIDC token for Entra ID
+
+concurrency:
+  group: marketplace
+  cancel-in-progress: false
+
+jobs:
+  identity:
+    if: github.repository_owner == 'Syntax-Syllogism' && github.event_name == 'workflow_dispatch' && inputs.mode == 'identity'
+    runs-on: ubuntu-latest
+    environment: marketplace
+    steps:
+      - uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+
+      # Prints the `id` to add as a Contributor member of the Marketplace publisher.
+      # 499b84ac-... is Azure DevOps's well-known resource ID.
+      - run: az rest -u https://app.vssps.visualstudio.com/_apis/profile/profiles/me --resource 499b84ac-1321-427f-aa17-267ca6975798
+
+  publish:
+    if: github.repository_owner == 'Syntax-Syllogism' && (github.event_name == 'release' || inputs.mode == 'publish')
+    runs-on: ubuntu-latest
+    environment: marketplace
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+      - name: Require a tag
+        if: env.TAG == ''
+        run: |
+          echo "::error::Set the 'tag' input when running manually."
+          exit 1
+
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Check tag matches package.json version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [ "v$VERSION" != "$TAG" ]; then
+            echo "::error::Tag $TAG does not match package.json version $VERSION"
+            exit 1
+          fi
+          echo "VSIX=$(node -p "require('./package.json').name")-$VERSION.vsix" >> "$GITHUB_ENV"
+
+      - name: Test (headless VS Code)
+        run: xvfb-run -a npm test
+
+      # vscode:prepublish runs the production build (type-check, lint, esbuild).
+      - name: Package VSIX
+        run: npx vsce package --no-dependencies -o "$VSIX"
+
+      - uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+
+      - name: Publish to Marketplace
+        run: npx vsce publish --azure-credential --skip-duplicate --packagePath "$VSIX"
+
+      - name: Attach VSIX to the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$TAG" "$VSIX" --clobber --repo "$GITHUB_REPOSITORY"

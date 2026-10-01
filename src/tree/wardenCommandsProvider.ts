@@ -15,7 +15,13 @@ interface CommandNode {
 }
 
 export class WardenCommandsProvider implements vscode.TreeDataProvider<WardenNode> {
-	public constructor(private readonly commands: readonly CommandDef[]) {}
+	private readonly changed = new vscode.EventEmitter<void>();
+	public readonly onDidChangeTreeData = this.changed.event;
+	public constructor(private commands: readonly CommandDef[]) {}
+	public refresh(commands: readonly CommandDef[]): void {
+		this.commands = commands;
+		this.changed.fire();
+	}
 
 	public getTreeItem(element: WardenNode): vscode.TreeItem {
 		if (element.type === 'group') {
@@ -30,7 +36,7 @@ export class WardenCommandsProvider implements vscode.TreeDataProvider<WardenNod
 			command: element.command.id,
 			title: element.command.title,
 		};
-		item.tooltip = element.command.cliId;
+		item.tooltip = element.command.title;
 		item.iconPath = new vscode.ThemeIcon(commandIcon(element.command));
 		item.contextValue = 'wardenCommand';
 		return item;
@@ -61,9 +67,7 @@ function orderedGroups(commands: readonly CommandDef[]): [string, CommandDef[]][
 	return orderedBuckets(commands, (command) => command.group);
 }
 
-// Bucket order follows the registry order (driven by the allow-list in
-// scripts/gen-commands.ts), which is the single source of truth for how groups
-// and commands are sequenced. A Map preserves first-insertion order.
+// Bucket order follows the descriptor order. A Map preserves insertion order.
 function orderedBuckets<T>(items: readonly T[], keyOf: (item: T) => string): [string, T[]][] {
 	const buckets = new Map<string, T[]>();
 	for (const item of items) {
