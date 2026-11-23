@@ -2,18 +2,18 @@
   "name": "warden-ext",
   "displayName": "Warden",
   "description": "Guided VS Code workflows for Warden user lifecycle operations on Salesforce orgs",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "publisher": "syntax-syllogism",
   "author": "Jake Richter <j.p.richter@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Syntax-Syllogism/warden-code-ext.git"
+    "url": "git+https://github.com/Syntax-Syllogism/warden-vscode-extension.git"
   },
   "bugs": {
-    "url": "https://github.com/Syntax-Syllogism/warden-code-ext/issues"
+    "url": "https://github.com/Syntax-Syllogism/warden-vscode-extension/issues"
   },
-  "homepage": "https://github.com/Syntax-Syllogism/warden-code-ext#readme",
+  "homepage": "https://github.com/Syntax-Syllogism/warden-vscode-extension#readme",
   "icon": "media/warden-logo.png",
   "keywords": [
     "salesforce",
@@ -145,7 +145,7 @@
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "26.x",
-    "@types/vscode": "1.140.0",
+    "@types/vscode": "1.125.0",
     "@vscode/test-cli": "^0.0.15",
     "@vscode/test-electron": "^3.1.0",
     "@vscode/vsce": "^3.9.2",
@@ -153,14 +153,31 @@
     "eslint": "^10.11.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
-    "markdownlint-cli2": "^0.23.3",
+    "markdownlint-cli2": "^0.24.2",
     "npm-run-all": "^4.1.5",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.0"
   },
   "overrides": {
     "diff": "^8.0.4",
-    "serialize-javascript": "^7.0.6"
+    "serialize-javascript": "^7.0.6",
+    "katex": "^0.18.2",
+    "@vscode/test-cli": {
+      "glob": "^14.0.2",
+      "minimatch": "^11.0.1"
+    },
+    "@vscode/vsce": {
+      "glob": "^14.0.2",
+      "minimatch": "^11.0.1"
+    },
+    "mocha": {
+      "glob": "^14.0.2",
+      "minimatch": "^11.0.1"
+    },
+    "test-exclude": {
+      "glob": "^14.0.2",
+      "minimatch": "^11.0.1"
+    }
   },
   "dependencies": {
     "@salesforce/core": "^8",

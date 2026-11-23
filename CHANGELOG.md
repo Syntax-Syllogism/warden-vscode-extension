@@ -4,6 +4,14 @@ All notable changes to the "warden-ext" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.3.3] - 2026-11-23
+
+### Security
+- Resolved open Dependabot alerts in dependencies
+
+### Fixed
+- Package repository links now point to the warden-vscode-extension repository
+
 ## [0.3.1] - 2026-10-01
 
 ### Changed
@@ -29,4 +37,4 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ### Added
 
-- Initial release — extracted from jawn-code-ext. Ships the 8 User Lifecycle commands (`SF Warden: Provision`, `Access`, `Strip`, `Freeze`, `Unfreeze`, `Snapshot`, `Restore`, `Diff`) targeting the standalone `@syntax-syllogism/warden` Salesforce CLI plugin, including the Strip dry-run/apply confirmation flow.
+- Initial release — extracted from jawn-vscode-extension. Ships the 8 User Lifecycle commands (`SF Warden: Provision`, `Access`, `Strip`, `Freeze`, `Unfreeze`, `Snapshot`, `Restore`, `Diff`) targeting the standalone `@syntax-syllogism/warden` Salesforce CLI plugin, including the Strip dry-run/apply confirmation flow.
